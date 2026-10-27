@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <header class="topbar">
+        <div class="brand">💰 Expense Tracker</div>
+        <span class="tagline">Manage your money wisely</span>
+    </header>
+
+    <main class="container">
+
+        <section class="welcome">
+            <div>
+                <p class="eyebrow">PERSONAL FINANCE</p>
+                <h1>Your spending, simplified.</h1>
+                <p class="subtitle">Keep track of where your money goes.</p>
+            </div>
+        </section>
+
+        <section class="summary">
+            <div class="summary-card">
+                <p>Total Expenses</p>
+                <h2>₹{{ "%.2f"|format(total) }}</h2>
+            </div>
+
+            <div class="summary-card">
+                <p>Transactions</p>
+                <h2>{{ expenses|length }}</h2>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <section class="content-grid">
+
+            <div class="panel">
+                <h2>Add New Expense</h2>
+                <p class="panel-description">
+                    Enter your expense details below.
+                </p>
+
+                <form method="POST" action="/">
+                    <label for="title">Expense Name</label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        placeholder="e.g. Lunch"
+                        maxlength="100"
+                        required
+                    >
+
+                    <label for="amount">Amount (₹)</label>
+                    <input
+                        type="number"
+                        id="amount"
+                        name="amount"
+                        placeholder="e.g. 250"
+                        min="0.01"
+                        step="0.01"
+                        required
+                    >
+
+                    <label for="category">Category</label>
+                    <select id="category" name="category" required>
+                        <option value="">Choose category</option>
+                        <option value="Food">Food</option>
+                        <option value="Travel">Travel</option>
+                        <option value="Shopping">Shopping</option>
+                        <option value="Education">Education</option>
+                        <option value="Bills">Bills</option>
+                        <option value="Health">Health</option>
+                        <option value="Other">Other</option>
+                    </select>
+
+                    <label for="expense_date">Date</label>
+                    <input
+                        type="date"
+                        id="expense_date"
+                        name="expense_date"
+                        value="{{ today }}"
+                        required
+                    >
+
+                    <button type="submit" class="primary-btn">
+                        + Add Expense
+                    </button>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h2>Recent Transactions</h2>
+                <p class="panel-description">
+                    Your recorded expenses.
+                </p>
+
+                {% if expenses %}
+                    <div class="expense-list">
+                        {% for expense in expenses|reverse %}
+                            <div class="expense-item">
+
+                                <div class="expense-icon">₹</div>
+
+                                <div class="expense-info">
+                                    <strong>{{ expense.title }}</strong>
+                                    <span>
+                                        {{ expense.category }} ·
+                                        {{ expense.date }}
+                                    </span>
+                                </div>
+
+                                <div class="expense-right">
+                                    <strong class="amount">
+                                        -₹{{ "%.2f"|format(expense.amount) }}
+                                    </strong>
+<a
+    href="{{ url_for('edit_expense', expense_id=expense.id) }}"
+    class="edit-btn"
+>
+    Edit
+</a>
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for('delete_expense', expense_id=expense.id) }}"
+                                        onsubmit="return confirm('Delete this expense?');"
+                                    >
+                                        <button
+                                            class="delete-btn"
+                                            type="submit"
+                                        >
+                                            Delete
+                                        </button>
+                                    </form>
+                                </div>
+
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon">🧾</div>
+                        <h3>No expenses yet</h3>
+                        <p>Add your first expense using the form.</p>
+                    </div>
+                {% endif %}
+            </div>
+
+        </section>
+
+        <footer>
+            Expense Tracker · Take control of your spending
+        </footer>
+
+    </main>
+
+</body>
+</html>
